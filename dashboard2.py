@@ -586,101 +586,95 @@ def make_macd_rsi_chart(t):
     fig.add_trace(go.Bar(
         x=t["Date"], y=t["MACD_hist"], name="Histogram",
         marker_color=hist_colors, opacity=0.65,
+        legendgroup="macd", legendgrouptitle_text="",
         hovertemplate="Histogram: %{y:.4f}<extra></extra>"
     ), row=1, col=1)
     fig.add_trace(go.Scatter(
         x=t["Date"], y=t["MACD"], name="MACD",
         line=dict(color="#3b82f6", width=2),
+        legendgroup="macd",
         hovertemplate="MACD: %{y:.4f}<extra></extra>"
     ), row=1, col=1)
     fig.add_trace(go.Scatter(
         x=t["Date"], y=t["MACD_signal"], name="Signal",
         line=dict(color="#f59e0b", width=1.8, dash="dot"),
+        legendgroup="macd",
         hovertemplate="Signal: %{y:.4f}<extra></extra>"
     ), row=1, col=1)
-    # Garis zero MACD
-    fig.add_hline(y=0, line_color="rgba(0,0,0,0.15)", line_width=1, row=1, col=1)
+    fig.add_hline(y=0, line_color="rgba(0,0,0,0.12)", line_width=1, row=1, col=1)
 
-    # ── RSI — zona warna sebagai filled area ──
+    # ── RSI zona warna (showlegend=False semua, biar ga masuk legend) ──
+    dates = t["Date"]
     rsi_vals = t["RSI"].fillna(50)
-    dates    = t["Date"]
 
-    # Zona overbought (>70): merah transparan
+    # Zona overbought fill antara 70–100
     fig.add_trace(go.Scatter(
-        x=dates, y=[70]*len(dates), name="Overbought (70)",
-        line=dict(color="rgba(220,38,38,0.0)", width=0),
+        x=dates, y=[70]*len(dates),
+        line=dict(color="rgba(0,0,0,0)", width=0),
         showlegend=False, hoverinfo="skip"
     ), row=2, col=1)
     fig.add_trace(go.Scatter(
-        x=dates, y=[100]*len(dates), name="Zona Overbought",
+        x=dates, y=[100]*len(dates),
         fill="tonexty", fillcolor="rgba(220,38,38,0.10)",
         line=dict(color="rgba(0,0,0,0)", width=0),
-        showlegend=True,
-        hoverinfo="skip"
+        showlegend=False, hoverinfo="skip"
     ), row=2, col=1)
 
-    # Zona oversold (<30): hijau transparan
+    # Zona oversold fill antara 0–30
     fig.add_trace(go.Scatter(
-        x=dates, y=[0]*len(dates), name="Oversold (0)",
+        x=dates, y=[0]*len(dates),
         line=dict(color="rgba(0,0,0,0)", width=0),
         showlegend=False, hoverinfo="skip"
     ), row=2, col=1)
     fig.add_trace(go.Scatter(
-        x=dates, y=[30]*len(dates), name="Zona Oversold",
+        x=dates, y=[30]*len(dates),
         fill="tonexty", fillcolor="rgba(22,163,74,0.10)",
         line=dict(color="rgba(0,0,0,0)", width=0),
-        showlegend=True,
-        hoverinfo="skip"
+        showlegend=False, hoverinfo="skip"
     ), row=2, col=1)
 
-    # Garis batas 70 & 30
-    fig.add_hline(
-        y=70, line_dash="dash", line_color="rgba(220,38,38,0.5)", line_width=1.2,
-        annotation_text="Overbought 70", annotation_position="right",
-        annotation_font=dict(color="#dc2626", size=11), row=2, col=1
-    )
-    fig.add_hline(
-        y=30, line_dash="dash", line_color="rgba(22,163,74,0.5)", line_width=1.2,
-        annotation_text="Oversold 30", annotation_position="right",
-        annotation_font=dict(color="#16a34a", size=11), row=2, col=1
-    )
-    fig.add_hline(
-        y=50, line_dash="dot", line_color="rgba(0,0,0,0.1)", line_width=1,
-        row=2, col=1
-    )
+    # Garis batas 70, 30, 50
+    fig.add_hline(y=70, line_dash="dash", line_color="rgba(220,38,38,0.45)", line_width=1.2,
+                  annotation_text="Overbought 70", annotation_position="right",
+                  annotation_font=dict(color="#dc2626", size=11), row=2, col=1)
+    fig.add_hline(y=30, line_dash="dash", line_color="rgba(22,163,74,0.45)", line_width=1.2,
+                  annotation_text="Oversold 30", annotation_position="right",
+                  annotation_font=dict(color="#16a34a", size=11), row=2, col=1)
+    fig.add_hline(y=50, line_dash="dot", line_color="rgba(0,0,0,0.08)", line_width=1, row=2, col=1)
 
-    # Garis RSI utama dengan fill ke bawah
+    # Garis RSI utama
     fig.add_trace(go.Scatter(
         x=dates, y=rsi_vals, name="RSI",
         line=dict(color="#7c3aed", width=2),
         fill="tozeroy", fillcolor="rgba(124,58,237,0.07)",
+        legendgroup="rsi",
         hovertemplate="RSI: %{y:.1f}<extra></extra>"
     ), row=2, col=1)
 
     fig.update_layout(
-        height=440,
+        height=460,
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(family="DM Sans", color="#1a1d2e", size=12),
-        margin=dict(l=10, r=80, t=36, b=10),
+        margin=dict(l=10, r=90, t=36, b=10),
         legend=dict(
-            orientation="h", y=1.08, x=0,
+            orientation="h", y=1.06, x=0,
             font=dict(size=12), bgcolor="rgba(0,0,0,0)",
-            traceorder="normal"
+            tracegroupgap=0,
         ),
         xaxis_rangeslider_visible=False,
         hovermode="x unified",
     )
-    # Axis styling
     for ax in ["xaxis", "xaxis2", "yaxis", "yaxis2"]:
         fig.update_layout(**{ax: dict(
             gridcolor=GRID_COLOR, showgrid=True,
             tickfont=dict(color=AXIS_COLOR, size=11),
             linecolor="#e8eaf0"
         )})
-    # RSI y-axis range
-    fig.update_layout(yaxis2=dict(range=[0, 100], gridcolor=GRID_COLOR,
-                                  tickfont=dict(color=AXIS_COLOR, size=11),
-                                  linecolor="#e8eaf0"))
+    fig.update_layout(yaxis2=dict(
+        range=[0, 100], gridcolor=GRID_COLOR,
+        tickfont=dict(color=AXIS_COLOR, size=11),
+        linecolor="#e8eaf0"
+    ))
     return fig
 
 # ──────────────────────────────────────────────────────
