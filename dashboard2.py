@@ -1035,8 +1035,6 @@ with col_sstat:
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="sec-divider"></div>', unsafe_allow_html=True)
-
 # ──────────────────────────────────────────────────────
 # RETURN
 # ──────────────────────────────────────────────────────
