@@ -453,8 +453,11 @@ SEKTOR_COLOR = {
 # ──────────────────────────────────────────────────────
 @st.cache_data(ttl=3600, show_spinner=False)
 def load_data():
+    import time
+    bust = int(time.time() // 3600)  # berubah setiap jam
+    url = HISTORICAL_URL + f"?bust={bust}"
     try:
-        r = requests.get(HISTORICAL_URL, timeout=20)
+        r = requests.get(url, timeout=20)
         r.raise_for_status()
         df = pd.read_csv(StringIO(r.text), parse_dates=["Date"])
     except Exception as e:
