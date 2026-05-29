@@ -1178,124 +1178,220 @@ st.markdown(f"""
 </div>""", unsafe_allow_html=True)
 
 # ──────────────────────────────────────────────────────
-# RSI & MACD
+# RSI
 # ──────────────────────────────────────────────────────
 st.markdown('<div class="sec-divider"></div>', unsafe_allow_html=True)
-st.markdown("#### RSI & MACD")
+st.markdown("#### RSI — Relative Strength Index")
 
 rsi_last   = t_full["RSI"].iloc[-1]
-macd_last  = t_full["MACD"].iloc[-1]
-msig_last  = t_full["MACD_signal"].iloc[-1]
-mhist_last = t_full["MACD_hist"].iloc[-1]
 r_sig, r_cls = rsi_signal(rsi_last)
-m_sig, m_cls = macd_signal_fn(macd_last, msig_last)
 
-rm1, rm2 = st.columns(2)
-with rm1:
-    rsi_bar   = min(max(rsi_last, 0), 100) if not pd.isna(rsi_last) else 50
-    rsi_color = "#16a34a" if rsi_last < 30 else ("#dc2626" if rsi_last > 70 else "#3b82f6")
+rsi_bar   = min(max(rsi_last, 0), 100) if not pd.isna(rsi_last) else 50
+rsi_color = "#16a34a" if rsi_last < 30 else ("#dc2626" if rsi_last > 70 else "#3b82f6")
+
+# Layout: gauge + info kiri, chart kanan
+col_rsi_info, col_rsi_chart = st.columns([1, 2])
+
+with col_rsi_info:
     st.markdown(f"""
-<div class="card">
+<div class="card" style="height:100%;">
   <div class="card-title">
-    <span class="stat-tip">RSI — Relative Strength Index (14)
+    <span class="stat-tip">RSI (14)
       <span class="tip-icon">?</span>
       <span class="tip-box">RSI mengukur kecepatan dan perubahan pergerakan harga dalam 14 hari terakhir.
-Nilai &lt;30: <strong>Oversold</strong> — saham mungkin terlalu murah (sinyal beli).
-Nilai &gt;70: <strong>Overbought</strong> — saham mungkin terlalu mahal (sinyal jual).
+Nilai &lt;30: <strong>Oversold</strong> — sinyal beli potensial.
+Nilai &gt;70: <strong>Overbought</strong> — sinyal jual potensial.
 Nilai 30–70: kondisi normal / netral.</span>
     </span>
   </div>
-  <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
-    <div style="font-size:32px; font-weight:700; color:{rsi_color}; font-family:DM Mono,monospace;">{rsi_last:.1f}</div>
-    <span class="{r_cls}">{r_sig}</span>
-  </div>
-  <div style="background:#f0f2f9; border-radius:99px; height:8px; overflow:hidden;">
-    <div style="width:{rsi_bar}%; height:100%; background:linear-gradient(90deg,#16a34a,{rsi_color}); border-radius:99px;"></div>
-  </div>
-  <div style="display:flex; justify-content:space-between; font-size:13px; color:#8b92a9; margin-top:4px;">
-    <span>0 — Oversold</span><span>30</span><span>70</span><span>Overbought — 100</span>
-  </div>
-</div>""", unsafe_allow_html=True)
-with rm2:
-    hist_color = "#16a34a" if mhist_last >= 0 else "#dc2626"
-    arrow_m    = "▲" if mhist_last >= 0 else "▼"
-    st.markdown(f"""
-<div class="card">
-  <div class="card-title">
-    <span class="stat-tip">MACD (12, 26, 9)
-      <span class="tip-icon">?</span>
-      <span class="tip-box">MACD (Moving Average Convergence Divergence) mengukur momentum tren.
-MACD Line = EMA 12 − EMA 26.
-Signal Line = EMA 9 dari MACD Line.
-Histogram = MACD − Signal.
-MACD &gt; Signal: tren naik (BUY). MACD &lt; Signal: tren turun (SELL).</span>
-    </span>
-  </div>
-  <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
-    <div style="font-size:32px; font-weight:700; color:#3b82f6; font-family:DM Mono,monospace;">{macd_last:.2f}</div>
-    <span class="{m_cls}">{m_sig}</span>
-  </div>
-  <table style="width:100%; font-size:14px; color:#5c6380;">
-    <tr><td style="padding:5px 0;">MACD Line</td><td style="text-align:right; font-family:DM Mono,monospace; color:#1a1d2e; font-size:15px; font-weight:600;">{macd_last:.4f}</td></tr>
-    <tr><td style="padding:5px 0;">Signal Line</td><td style="text-align:right; font-family:DM Mono,monospace; color:#1a1d2e; font-size:15px; font-weight:600;">{msig_last:.4f}</td></tr>
-    <tr><td style="padding:5px 0;">Histogram</td><td style="text-align:right; font-family:DM Mono,monospace; color:{hist_color}; font-size:15px; font-weight:600;">{arrow_m} {abs(mhist_last):.4f}</td></tr>
-  </table>
-</div>""", unsafe_allow_html=True)
 
-t_ind   = compute_indicators(t_full.copy())
-fig_ind = make_macd_rsi_chart(filter_period(t_ind, chart_period))
-st.plotly_chart(fig_ind, use_container_width=True)
+  <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
+    <div style="font-size:44px; font-weight:700; color:{rsi_color}; font-family:'DM Mono',monospace; line-height:1;">{rsi_last:.1f}</div>
+    <div>
+      <span class="{r_cls}" style="font-size:15px;">{r_sig}</span>
+      <div style="font-size:12px; color:#8b92a9; margin-top:4px;">Per {last['Date'].strftime('%d %b %Y')}</div>
+    </div>
+  </div>
 
-# Keterangan makna RSI
-st.markdown("""
-<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:-8px; margin-bottom:8px;">
-  <div style="display:flex; align-items:flex-start; gap:10px; background:#fff7ed;
-              border:1px solid #fed7aa; border-left:4px solid #f59e0b;
-              border-radius:8px; padding:10px 14px; flex:1; min-width:220px;">
-    <span style="font-size:18px;">📊</span>
-    <div>
-      <div style="font-size:13px; font-weight:700; color:#92400e; margin-bottom:3px;">RSI — Cara Membaca</div>
-      <div style="font-size:13px; color:#78350f; line-height:1.6;">
-        RSI mengukur <b>kekuatan momentum</b> harga dalam 14 hari terakhir (skala 0–100).
-      </div>
+  <div style="margin-bottom:6px;">
+    <div style="background:#f0f2f9; border-radius:99px; height:10px; overflow:hidden; position:relative;">
+      <div style="position:absolute; left:0; top:0; bottom:0; width:30%; background:rgba(22,163,74,0.15);"></div>
+      <div style="position:absolute; right:0; top:0; bottom:0; width:30%; background:rgba(220,38,38,0.15);"></div>
+      <div style="width:{rsi_bar}%; height:100%; background:{rsi_color}; border-radius:99px; transition:width 0.3s;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:#8b92a9; margin-top:5px;">
+      <span style="color:#16a34a; font-weight:600;">0 Oversold</span>
+      <span>30</span>
+      <span style="font-weight:600; color:#1a1d2e;">50</span>
+      <span>70</span>
+      <span style="color:#dc2626; font-weight:600;">Overbought 100</span>
     </div>
   </div>
-  <div style="display:flex; align-items:flex-start; gap:10px; background:#fef2f2;
-              border:1px solid #fecaca; border-left:4px solid #dc2626;
-              border-radius:8px; padding:10px 14px; flex:1; min-width:220px;">
-    <span style="font-size:18px;">🔴</span>
-    <div>
-      <div style="font-size:13px; font-weight:700; color:#991b1b; margin-bottom:3px;">RSI &gt; 70 — Overbought (Jenuh Beli)</div>
-      <div style="font-size:13px; color:#7f1d1d; line-height:1.6;">
-        Saham sudah naik terlalu banyak dalam waktu singkat. Harga berpotensi <b>terkoreksi turun</b>. Sinyal hati-hati untuk beli baru.
-      </div>
+
+  <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+    <div style="display:flex; align-items:flex-start; gap:8px; background:#f0fdf4; border-left:3px solid #16a34a; border-radius:0 6px 6px 0; padding:8px 10px;">
+      <div style="font-size:12px; color:#15803d; line-height:1.5;"><b>RSI &lt; 30</b> — Oversold (Jenuh Jual)<br><span style="font-weight:400;">Harga berpotensi rebound naik.</span></div>
     </div>
-  </div>
-  <div style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4;
-              border:1px solid #bbf7d0; border-left:4px solid #16a34a;
-              border-radius:8px; padding:10px 14px; flex:1; min-width:220px;">
-    <span style="font-size:18px;">🟢</span>
-    <div>
-      <div style="font-size:13px; font-weight:700; color:#14532d; margin-bottom:3px;">RSI &lt; 30 — Oversold (Jenuh Jual)</div>
-      <div style="font-size:13px; color:#14532d; line-height:1.6;">
-        Saham sudah turun terlalu dalam. Harga berpotensi <b>rebound naik</b>. Sinyal potensi peluang beli.
-      </div>
+    <div style="display:flex; align-items:flex-start; gap:8px; background:#fef2f2; border-left:3px solid #dc2626; border-radius:0 6px 6px 0; padding:8px 10px;">
+      <div style="font-size:12px; color:#b91c1c; line-height:1.5;"><b>RSI &gt; 70</b> — Overbought (Jenuh Beli)<br><span style="font-weight:400;">Harga berpotensi terkoreksi turun.</span></div>
     </div>
-  </div>
-  <div style="display:flex; align-items:flex-start; gap:10px; background:#f8faff;
-              border:1px solid #e0e7ff; border-left:4px solid #6366f1;
-              border-radius:8px; padding:10px 14px; flex:1; min-width:220px;">
-    <span style="font-size:18px;">⚪</span>
-    <div>
-      <div style="font-size:13px; font-weight:700; color:#3730a3; margin-bottom:3px;">RSI 30–70 — Normal</div>
-      <div style="font-size:13px; color:#312e81; line-height:1.6;">
-        Kondisi pasar <b>netral</b>, momentum tidak ekstrem ke arah manapun. Perlu sinyal lain untuk konfirmasi arah.
-      </div>
+    <div style="display:flex; align-items:flex-start; gap:8px; background:#f8faff; border-left:3px solid #6366f1; border-radius:0 6px 6px 0; padding:8px 10px;">
+      <div style="font-size:12px; color:#3730a3; line-height:1.5;"><b>RSI 30–70</b> — Netral<br><span style="font-weight:400;">Momentum tidak ekstrem.</span></div>
     </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
+with col_rsi_chart:
+    # Chart RSI saja
+    t_rsi = filter_period(compute_indicators(t_full.copy()), chart_period)
+    fig_rsi = go.Figure()
+
+    dates_r = t_rsi["Date"]
+    rsi_vals = t_rsi["RSI"].fillna(50)
+
+    # Zona warna
+    fig_rsi.add_trace(go.Scatter(x=dates_r, y=[100]*len(dates_r), line=dict(color="rgba(0,0,0,0)", width=0), showlegend=False, hoverinfo="skip"))
+    fig_rsi.add_trace(go.Scatter(x=dates_r, y=[70]*len(dates_r), fill="tonexty", fillcolor="rgba(220,38,38,0.08)", line=dict(color="rgba(0,0,0,0)", width=0), showlegend=False, hoverinfo="skip"))
+    fig_rsi.add_trace(go.Scatter(x=dates_r, y=[0]*len(dates_r), line=dict(color="rgba(0,0,0,0)", width=0), showlegend=False, hoverinfo="skip"))
+    fig_rsi.add_trace(go.Scatter(x=dates_r, y=[30]*len(dates_r), fill="tonexty", fillcolor="rgba(22,163,74,0.08)", line=dict(color="rgba(0,0,0,0)", width=0), showlegend=False, hoverinfo="skip"))
+
+    fig_rsi.add_hline(y=70, line_dash="dash", line_color="rgba(220,38,38,0.5)", line_width=1.2,
+                      annotation_text="Overbought 70", annotation_position="right",
+                      annotation_font=dict(color="#dc2626", size=11))
+    fig_rsi.add_hline(y=30, line_dash="dash", line_color="rgba(22,163,74,0.5)", line_width=1.2,
+                      annotation_text="Oversold 30", annotation_position="right",
+                      annotation_font=dict(color="#16a34a", size=11))
+    fig_rsi.add_hline(y=50, line_dash="dot", line_color="rgba(0,0,0,0.08)", line_width=1)
+
+    fig_rsi.add_trace(go.Scatter(
+        x=dates_r, y=rsi_vals, name="RSI",
+        line=dict(color="#7c3aed", width=2.2),
+        fill="tozeroy", fillcolor="rgba(124,58,237,0.06)",
+        hovertemplate="RSI: %{y:.1f}<extra></extra>"
+    ))
+
+    fig_rsi.update_layout(
+        height=320,
+        paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
+        font=dict(family="DM Sans", color="#1a1d2e", size=11),
+        margin=dict(l=0, r=90, t=16, b=8),
+        showlegend=False,
+        hovermode="x unified",
+        xaxis=dict(gridcolor=GRID_COLOR, showgrid=True, tickfont=dict(color=AXIS_COLOR, size=10), linecolor="#e8eaf0"),
+        yaxis=dict(range=[0, 100], gridcolor=GRID_COLOR, showgrid=True, tickfont=dict(color=AXIS_COLOR, size=10), linecolor="#e8eaf0"),
+    )
+    st.plotly_chart(fig_rsi, use_container_width=True)
+
+
+# ──────────────────────────────────────────────────────
+# MACD
+# ──────────────────────────────────────────────────────
+st.markdown('<div class="sec-divider"></div>', unsafe_allow_html=True)
+st.markdown("#### MACD — Moving Average Convergence Divergence")
+
+macd_last  = t_full["MACD"].iloc[-1]
+msig_last  = t_full["MACD_signal"].iloc[-1]
+mhist_last = t_full["MACD_hist"].iloc[-1]
+m_sig, m_cls = macd_signal_fn(macd_last, msig_last)
+
+col_macd_info, col_macd_chart = st.columns([1, 2])
+
+with col_macd_info:
+    hist_color = "#16a34a" if mhist_last >= 0 else "#dc2626"
+    arrow_m    = "▲" if mhist_last >= 0 else "▼"
+    trend_txt  = "Momentum <b>bullish</b> — MACD di atas Signal Line." if macd_last > msig_last else "Momentum <b>bearish</b> — MACD di bawah Signal Line."
+    trend_bg   = "#f0fdf4" if macd_last > msig_last else "#fef2f2"
+    trend_bdr  = "#16a34a" if macd_last > msig_last else "#dc2626"
+    trend_clr  = "#15803d" if macd_last > msig_last else "#b91c1c"
+
+    st.markdown(f"""
+<div class="card" style="height:100%;">
+  <div class="card-title">
+    <span class="stat-tip">MACD (12, 26, 9)
+      <span class="tip-icon">?</span>
+      <span class="tip-box">MACD = EMA 12 − EMA 26. Signal = EMA 9 dari MACD. Histogram = MACD − Signal.
+MACD &gt; Signal: tren naik (BUY). MACD &lt; Signal: tren turun (SELL).</span>
+    </span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+    <div style="font-size:36px; font-weight:700; color:#3b82f6; font-family:'DM Mono',monospace; line-height:1;">{macd_last:.2f}</div>
+    <div>
+      <span class="{m_cls}" style="font-size:15px;">{m_sig}</span>
+      <div style="font-size:12px; color:#8b92a9; margin-top:4px;">Per {last['Date'].strftime('%d %b %Y')}</div>
+    </div>
+  </div>
+
+  <table style="width:100%; font-size:14px; border-collapse:collapse; margin-bottom:16px;">
+    <tr style="border-bottom:1px solid #f0f2f9;">
+      <td style="padding:9px 4px; color:#8b92a9; font-weight:500;">
+        <span class="stat-tip">MACD Line<span class="tip-icon">?</span><span class="tip-box">EMA 12 dikurangi EMA 26. Nilai positif = EMA jangka pendek di atas EMA jangka panjang (momentum bullish).</span></span>
+      </td>
+      <td style="text-align:right; font-family:'DM Mono',monospace; font-weight:700; color:#3b82f6; font-size:15px; padding:9px 4px;">{macd_last:.4f}</td>
+    </tr>
+    <tr style="border-bottom:1px solid #f0f2f9;">
+      <td style="padding:9px 4px; color:#8b92a9; font-weight:500;">
+        <span class="stat-tip">Signal Line<span class="tip-icon">?</span><span class="tip-box">EMA 9 dari MACD Line. Crossover MACD melewati Signal dari bawah = sinyal BUY. Dari atas = sinyal SELL.</span></span>
+      </td>
+      <td style="text-align:right; font-family:'DM Mono',monospace; font-weight:700; color:#f59e0b; font-size:15px; padding:9px 4px;">{msig_last:.4f}</td>
+    </tr>
+    <tr>
+      <td style="padding:9px 4px; color:#8b92a9; font-weight:500;">
+        <span class="stat-tip">Histogram<span class="tip-icon">?</span><span class="tip-box">Selisih MACD − Signal. Histogram positif (hijau) = momentum menguat ke atas. Negatif (merah) = melemah.</span></span>
+      </td>
+      <td style="text-align:right; font-family:'DM Mono',monospace; font-weight:700; color:{hist_color}; font-size:15px; padding:9px 4px;">{arrow_m} {abs(mhist_last):.4f}</td>
+    </tr>
+  </table>
+
+  <div style="background:{trend_bg}; border-left:3px solid {trend_bdr}; border-radius:0 6px 6px 0; padding:10px 12px; font-size:13px; color:{trend_clr}; line-height:1.6;">
+    {trend_txt}
+  </div>
+
+  <div style="margin-top:12px; background:#f8faff; border-left:3px solid #6366f1; border-radius:0 6px 6px 0; padding:10px 12px; font-size:12px; color:#3730a3; line-height:1.6;">
+    <b>Cara baca:</b> Perhatikan <b>crossover</b> MACD (biru) memotong Signal (kuning). Histogram membesar = momentum menguat.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+with col_macd_chart:
+    t_macd = filter_period(compute_indicators(t_full.copy()), chart_period)
+    fig_macd = go.Figure()
+
+    hist_colors = ["#16a34a" if v >= 0 else "#dc2626" for v in t_macd["MACD_hist"].fillna(0)]
+    fig_macd.add_trace(go.Bar(
+        x=t_macd["Date"], y=t_macd["MACD_hist"], name="Histogram",
+        marker_color=hist_colors, opacity=0.65,
+        hovertemplate="Histogram: %{y:.4f}<extra></extra>"
+    ))
+    fig_macd.add_trace(go.Scatter(
+        x=t_macd["Date"], y=t_macd["MACD"], name="MACD",
+        line=dict(color="#3b82f6", width=2.2),
+        hovertemplate="MACD: %{y:.4f}<extra></extra>"
+    ))
+    fig_macd.add_trace(go.Scatter(
+        x=t_macd["Date"], y=t_macd["MACD_signal"], name="Signal",
+        line=dict(color="#f59e0b", width=1.8, dash="dot"),
+        hovertemplate="Signal: %{y:.4f}<extra></extra>"
+    ))
+    fig_macd.add_hline(y=0, line_color="rgba(0,0,0,0.12)", line_width=1)
+
+    fig_macd.update_layout(
+        height=320,
+        paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
+        font=dict(family="DM Sans", color="#1a1d2e", size=11),
+        margin=dict(l=0, r=16, t=16, b=8),
+        legend=dict(orientation="h", y=1.12, x=0, font_size=11, bgcolor="rgba(0,0,0,0)"),
+        hovermode="x unified",
+        xaxis=dict(gridcolor=GRID_COLOR, showgrid=True, tickfont=dict(color=AXIS_COLOR, size=10), linecolor="#e8eaf0"),
+        yaxis=dict(gridcolor=GRID_COLOR, showgrid=True, tickfont=dict(color=AXIS_COLOR, size=10), linecolor="#e8eaf0"),
+    )
+    st.plotly_chart(fig_macd, use_container_width=True)
+
+
+# ──────────────────────────────────────────────────────
+# FOOTER
+# ──────────────────────────────────────────────────────
 st.markdown(f"""
 <div style="text-align:center; color:#c0c6d8; font-size:13px; margin-top:24px;
             padding-top:16px; border-top:1px solid #e8eaf0;">
