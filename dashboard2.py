@@ -1393,9 +1393,21 @@ with col_macd_chart:
 # FOOTER
 # ──────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="text-align:center; color:#c0c6d8; font-size:13px; margin-top:24px;
-            padding-top:16px; border-top:1px solid #e8eaf0;">
-  ⚠️ Dashboard ini bersifat informatif dan bukan merupakan rekomendasi investasi.
-  &nbsp;|&nbsp; Data: Yahoo Finance (per {last['Date'].strftime('%d %b %Y')})
+<div style="margin-top:32px; padding-top:20px; border-top:1px solid #e8eaf0;">
+  <div style="text-align:center; margin-bottom:10px;">
+    <span style="font-size:18px; font-weight:700; color:#1a1d2e; letter-spacing:-0.3px;">
+       <span style="color:#16a34a;">SAWIT</span>
+    </span>
+    <span style="font-size:13px; color:#8b92a9; margin-left:8px; font-weight:400;">Sahabat Duwit</span>
+  </div>
+  <div style="text-align:center; margin-bottom:6px;">
+    <span style="background:#dbeafe; color:#1e40af; border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600; margin:0 4px;">Coding Camp 2026</span>
+    <span style="background:#dcfce7; color:#15803d; border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600; margin:0 4px;">DBS Foundation</span>
+    <span style="background:#f0f2f9; color:#3d4466; border-radius:20px; padding:3px 12px; font-size:12px; font-weight:600; margin:0 4px;">CC26-PSU329</span>
+  </div>
+  <div style="text-align:center; color:#c0c6d8; font-size:12px; margin-top:10px;">
+    ⚠️ Dashboard ini bersifat informatif dan bukan merupakan rekomendasi investasi.
+    &nbsp;|&nbsp; Data: Yahoo Finance (per {last['Date'].strftime('%d %b %Y')})
+  </div>
 </div>
 """, unsafe_allow_html=True)
